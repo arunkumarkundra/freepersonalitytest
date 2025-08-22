@@ -1064,6 +1064,55 @@
         }
 
         function shareAsImage() {
+            const resultsScreen = document.getElementById('results-screen');
+            if (!resultsScreen) {
+                alert('Results screen not found. Please complete the assessment first.');
+                return;
+            }
+        
+            // Use html2canvas to render the results screen to a canvas
+            html2canvas(resultsScreen, {
+                scale: 2, // Increase resolution for better image quality
+                useCORS: true // Required for some browsers
+            }).then(canvas => {
+                // Generate a filename
+                const timestamp = new Date().toISOString().slice(0, 19).replace(/[:-]/g, '').replace('T', '_');
+                const filename = `personality-assessment-results-${timestamp}.png`;
+        
+                // Check for Web Share API support
+                if (navigator.share) {
+                    canvas.toBlob(blob => {
+                        const file = new File([blob], filename, { type: 'image/png' });
+                        navigator.share({
+                            files: [file],
+                            title: 'My Personality Assessment Results',
+                            text: 'Check out my personality type! Find out yours with this free test.'
+                        }).catch(error => {
+                            console.error('Sharing failed:', error);
+                            // Fallback to download if sharing fails
+                            downloadCanvasImage(canvas, filename);
+                        });
+                    });
+                } else {
+                    // Fallback for browsers without Web Share API
+                    downloadCanvasImage(canvas, filename);
+                    alert("Your browser doesn't support the 'Share' function. The image has been downloaded instead.");
+                }
+            }).catch(error => {
+                console.error('Error generating image:', error);
+                alert('Failed to create a shareable image. Please try again.');
+            });
+        }
+        
+        function downloadCanvasImage(canvas, filename) {
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        
+        function GrokshareAsImage() {
             // Validate assessment results
             const results = window.assessmentResults;
             if (!results || !results.mbtiType || !results.mbtiDescription || !results.bigFive || !results.recommendations) {

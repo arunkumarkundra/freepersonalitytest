@@ -411,7 +411,7 @@
                 <div class="export-buttons">
                     <button class="export-btn" onclick="exportPDF()">Export as PDF</button>
                     <button class="export-btn" onclick="exportJSON()">Export as JSON</button>
-                    <button class="export-btn" onclick="exportImage()">Export as Image</button>
+                    <button class="export-btn" onclick="shareAsImage()">Share as Image</button>
                 </div>
 
                 <button class="restart-btn" onclick="restartAssessment()">Take Assessment Again</button>
@@ -849,49 +849,207 @@
         // Export Functions
         function exportPDF() {
             const results = window.assessmentResults;
-            let pdfContent = `
-PERSONALITY ASSESSMENT RESULTS
-================================
+            const timestamp = new Date().toLocaleString();
+            const currentURL = window.location.href;
+            const fileTimestamp = new Date().toISOString().slice(0, 19).replace(/[:-]/g, '').replace('T', '_');
+            
+            // Create PDF content using HTML and CSS for better formatting
+            const pdfHTML = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <title>Personality Assessment Results</title>
+                <style>
+                    body { 
+                        font-family: Arial, sans-serif; 
+                        line-height: 1.6; 
+                        color: #333; 
+                        max-width: 800px; 
+                        margin: 0 auto; 
+                        padding: 20px;
+                        background: white;
+                    }
+                    .header { 
+                        text-align: center; 
+                        border-bottom: 3px solid #667eea; 
+                        padding-bottom: 20px; 
+                        margin-bottom: 30px;
+                    }
+                    .header h1 { 
+                        color: #667eea; 
+                        font-size: 2.5em; 
+                        margin: 0;
+                    }
+                    .mbti-section { 
+                        background: linear-gradient(135deg, #667eea, #764ba2); 
+                        color: white; 
+                        padding: 30px; 
+                        border-radius: 15px; 
+                        text-align: center; 
+                        margin-bottom: 30px;
+                    }
+                    .mbti-type { 
+                        font-size: 4em; 
+                        font-weight: bold; 
+                        margin: 10px 0;
+                    }
+                    .section { 
+                        margin-bottom: 30px; 
+                        padding: 20px; 
+                        background: #f8f9fa; 
+                        border-radius: 10px; 
+                        border-left: 5px solid #667eea;
+                    }
+                    .section h2 { 
+                        color: #667eea; 
+                        margin-top: 0;
+                        font-size: 1.5em;
+                    }
+                    .trait-item { 
+                        display: flex; 
+                        justify-content: space-between; 
+                        margin: 10px 0; 
+                        padding: 8px 0;
+                        border-bottom: 1px solid #dee2e6;
+                    }
+                    .recommendations { 
+                        display: grid; 
+                        grid-template-columns: 1fr 1fr; 
+                        gap: 20px; 
+                        margin-top: 20px;
+                    }
+                    .rec-column { 
+                        background: white; 
+                        padding: 20px; 
+                        border-radius: 10px; 
+                        border-left: 5px solid #48bb78;
+                    }
+                    .rec-column.donts { 
+                        border-left-color: #e53e3e;
+                    }
+                    .rec-column h3 { 
+                        margin-top: 0; 
+                        color: #2d3748;
+                    }
+                    .rec-column ul { 
+                        list-style: none; 
+                        padding: 0;
+                    }
+                    .rec-column li { 
+                        margin: 8px 0; 
+                        padding-left: 20px; 
+                        position: relative;
+                    }
+                    .rec-column li:before { 
+                        content: "✓"; 
+                        position: absolute; 
+                        left: 0; 
+                        color: #48bb78; 
+                        font-weight: bold;
+                    }
+                    .rec-column.donts li:before { 
+                        content: "✗"; 
+                        color: #e53e3e;
+                    }
+                    .footer { 
+                        margin-top: 50px; 
+                        padding-top: 20px; 
+                        border-top: 2px solid #dee2e6; 
+                        text-align: center; 
+                        color: #6c757d; 
+                        font-size: 0.9em;
+                    }
+                    @media print {
+                        body { margin: 0; padding: 15px; }
+                        .recommendations { grid-template-columns: 1fr; }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="header">
+                    <h1>Personality Assessment Results</h1>
+                </div>
+                
+                <div class="mbti-section">
+                    <div class="mbti-type">${results.mbtiType}</div>
+                    <p style="font-size: 1.2em; margin: 0;">${results.mbtiDescription}</p>
+                </div>
 
-MBTI Type: ${results.mbtiType}
-${results.mbtiDescription}
+                <div class="section">
+                    <h2>Personality Analysis</h2>
+                    <p>${results.personalityAnalysis}</p>
+                </div>
 
-PERSONALITY ANALYSIS:
-${results.personalityAnalysis}
+                <div class="section">
+                    <h2>Big Five Personality Traits</h2>
+                    <div class="trait-item">
+                        <span><strong>Openness to Experience:</strong></span>
+                        <span><strong>${Math.round(results.bigFive.openness)}%</strong></span>
+                    </div>
+                    <div class="trait-item">
+                        <span><strong>Conscientiousness:</strong></span>
+                        <span><strong>${Math.round(results.bigFive.conscientiousness)}%</strong></span>
+                    </div>
+                    <div class="trait-item">
+                        <span><strong>Extraversion:</strong></span>
+                        <span><strong>${Math.round(results.bigFive.extraversion)}%</strong></span>
+                    </div>
+                    <div class="trait-item">
+                        <span><strong>Agreeableness:</strong></span>
+                        <span><strong>${Math.round(results.bigFive.agreeableness)}%</strong></span>
+                    </div>
+                    <div class="trait-item">
+                        <span><strong>Neuroticism:</strong></span>
+                        <span><strong>${Math.round(results.bigFive.neuroticism)}%</strong></span>
+                    </div>
+                </div>
 
-BIG FIVE TRAITS:
-- Openness: ${Math.round(results.bigFive.openness)}%
-- Conscientiousness: ${Math.round(results.bigFive.conscientiousness)}%
-- Extraversion: ${Math.round(results.bigFive.extraversion)}%
-- Agreeableness: ${Math.round(results.bigFive.agreeableness)}%
-- Neuroticism: ${Math.round(results.bigFive.neuroticism)}%
+                <div class="section">
+                    <h2>Professional Recommendations</h2>
+                    <div class="recommendations">
+                        <div class="rec-column">
+                            <h3>✓ Do's - Suitable For:</h3>
+                            <ul>
+                                ${results.recommendations.dos.map(item => `<li>${item}</li>`).join('')}
+                            </ul>
+                        </div>
+                        <div class="rec-column donts">
+                            <h3>✗ Don'ts - Avoid:</h3>
+                            <ul>
+                                ${results.recommendations.donts.map(item => `<li>${item}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
 
-PROFESSIONAL RECOMMENDATIONS:
+                <div class="footer">
+                    <p><strong>Generated on:</strong> ${timestamp}</p>
+                    <p><strong>Take your free personality test on:</strong> ${currentURL}</p>
+                </div>
+            </body>
+            </html>`;
 
-DO'S - Suitable For:
-${results.recommendations.dos.map(item => `• ${item}`).join('\n')}
-
-DON'TS - Avoid:
-${results.recommendations.donts.map(item => `• ${item}`).join('\n')}
-
-Generated on: ${new Date().toLocaleDateString()}
-            `;
-
-            // Create and download PDF as text file (simplified)
-            const blob = new Blob([pdfContent], { type: 'text/plain' });
+            // Create blob and download as HTML (which can be saved as PDF by browser)
+            const blob = new Blob([pdfHTML], { type: 'text/html' });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `personality-assessment-${results.mbtiType}.txt`;
+            a.download = `personality-assessment-${results.mbtiType}-${fileTimestamp}.html`;
             a.click();
             window.URL.revokeObjectURL(url);
+            
+            // Show instruction to user
+            alert('Your results have been downloaded as an HTML file. You can open it in your browser and use "Print to PDF" to save as a PDF document.');
         }
 
         function exportJSON() {
             const results = window.assessmentResults;
+            const timestamp = new Date().toISOString();
+            const fileTimestamp = new Date().toISOString().slice(0, 19).replace(/[:-]/g, '').replace('T', '_');
             const jsonData = {
                 ...results,
-                exportDate: new Date().toISOString(),
+                exportDate: timestamp,
                 version: "1.0"
             };
 
@@ -899,19 +1057,22 @@ Generated on: ${new Date().toLocaleDateString()}
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `personality-assessment-${results.mbtiType}.json`;
+            a.download = `personality-assessment-${results.mbtiType}-${fileTimestamp}.json`;
             a.click();
             window.URL.revokeObjectURL(url);
         }
 
-        function exportImage() {
+        function shareAsImage() {
             const results = window.assessmentResults;
+            const timestamp = new Date().toLocaleString();
+            const currentURL = window.location.href;
+            const fileTimestamp = new Date().toISOString().slice(0, 19).replace(/[:-]/g, '').replace('T', '_');
             
             // Create canvas for image generation
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
-            canvas.width = 800;
-            canvas.height = 1000;
+            canvas.width = 1080;  // Instagram/social media friendly size
+            canvas.height = 1350; // Taller to accommodate all content
 
             // Background gradient
             const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
@@ -920,62 +1081,182 @@ Generated on: ${new Date().toLocaleDateString()}
             ctx.fillStyle = gradient;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // White content area
+            // White content area with padding
+            const padding = 60;
+            const contentWidth = canvas.width - (padding * 2);
+            const contentHeight = canvas.height - (padding * 2);
             ctx.fillStyle = 'white';
-            ctx.fillRect(50, 50, canvas.width - 100, canvas.height - 100);
+            ctx.fillRect(padding, padding, contentWidth, contentHeight);
+
+            // Helper function to wrap text
+            function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+                const words = text.split(' ');
+                let line = '';
+                let currentY = y;
+
+                for (let n = 0; n < words.length; n++) {
+                    const testLine = line + words[n] + ' ';
+                    const metrics = ctx.measureText(testLine);
+                    const testWidth = metrics.width;
+                    if (testWidth > maxWidth && n > 0) {
+                        ctx.fillText(line, x, currentY);
+                        line = words[n] + ' ';
+                        currentY += lineHeight;
+                    } else {
+                        line = testLine;
+                    }
+                }
+                ctx.fillText(line, x, currentY);
+                return currentY + lineHeight;
+            }
 
             // Title
             ctx.fillStyle = '#2d3748';
-            ctx.font = 'bold 36px Arial';
+            ctx.font = 'bold 48px Arial';
             ctx.textAlign = 'center';
-            ctx.fillText('Personality Assessment', canvas.width / 2, 120);
+            ctx.fillText('Personality Assessment', canvas.width / 2, 140);
 
             // MBTI Type
-            ctx.font = 'bold 72px Arial';
+            ctx.font = 'bold 120px Arial';
             ctx.fillStyle = '#764ba2';
-            ctx.fillText(results.mbtiType, canvas.width / 2, 220);
+            ctx.fillText(results.mbtiType, canvas.width / 2, 280);
 
-            // Description
-            ctx.font = '18px Arial';
+            // MBTI Description
+            ctx.font = '24px Arial';
             ctx.fillStyle = '#4a5568';
-            ctx.fillText(results.mbtiDescription, canvas.width / 2, 260);
+            ctx.textAlign = 'center';
+            wrapText(ctx, results.mbtiDescription, canvas.width / 2, 320, contentWidth - 40, 30);
+
+            // Personality Analysis
+            ctx.textAlign = 'left';
+            ctx.font = 'bold 32px Arial';
+            ctx.fillStyle = '#667eea';
+            ctx.fillText('Personality Analysis', padding + 40, 420);
+
+            ctx.font = '20px Arial';
+            ctx.fillStyle = '#4a5568';
+            wrapText(ctx, results.personalityAnalysis, padding + 40, 460, contentWidth - 80, 28);
 
             // Big Five Traits
-            ctx.textAlign = 'left';
-            ctx.font = 'bold 24px Arial';
-            ctx.fillStyle = '#2d3748';
-            ctx.fillText('Big Five Traits:', 100, 320);
+            ctx.font = 'bold 32px Arial';
+            ctx.fillStyle = '#667eea';
+            ctx.fillText('Big Five Traits', padding + 40, 620);
 
-            ctx.font = '18px Arial';
-            ctx.fillStyle = '#4a5568';
-            let yPos = 360;
+            ctx.font = '22px Arial';
+            ctx.fillStyle = '#2d3748';
+            let yPos = 670;
+            const traitNames = {
+                openness: 'Openness',
+                conscientiousness: 'Conscientiousness', 
+                extraversion: 'Extraversion',
+                agreeableness: 'Agreeableness',
+                neuroticism: 'Neuroticism'
+            };
+
             for (const [trait, score] of Object.entries(results.bigFive)) {
-                const traitNames = {
-                    openness: 'Openness',
-                    conscientiousness: 'Conscientiousness', 
-                    extraversion: 'Extraversion',
-                    agreeableness: 'Agreeableness',
-                    neuroticism: 'Neuroticism'
-                };
-                ctx.fillText(`${traitNames[trait]}: ${Math.round(score)}%`, 100, yPos);
-                yPos += 30;
+                // Trait name and score
+                ctx.fillText(`${traitNames[trait]}: ${Math.round(score)}%`, padding + 40, yPos);
+                
+                // Progress bar
+                const barWidth = 300;
+                const barHeight = 12;
+                const barX = padding + 400;
+                const barY = yPos - 15;
+                
+                // Bar background
+                ctx.fillStyle = '#e2e8f0';
+                ctx.fillRect(barX, barY, barWidth, barHeight);
+                
+                // Bar fill
+                const gradient = ctx.createLinearGradient(barX, barY, barX + barWidth, barY);
+                gradient.addColorStop(0, '#667eea');
+                gradient.addColorStop(1, '#764ba2');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(barX, barY, (barWidth * score) / 100, barHeight);
+                
+                ctx.fillStyle = '#2d3748';
+                yPos += 45;
             }
 
-            // Generate date
-            ctx.font = '14px Arial';
+            // Professional Recommendations
+            ctx.font = 'bold 32px Arial';
+            ctx.fillStyle = '#667eea';
+            ctx.fillText('Professional Recommendations', padding + 40, yPos + 40);
+
+            // Do's column
+            ctx.font = 'bold 24px Arial';
+            ctx.fillStyle = '#48bb78';
+            ctx.fillText('✓ Suitable For:', padding + 40, yPos + 90);
+            
+            ctx.font = '18px Arial';
+            ctx.fillStyle = '#2d3748';
+            let dosY = yPos + 120;
+            results.recommendations.dos.slice(0, 4).forEach(item => {
+                wrapText(ctx, `• ${item}`, padding + 40, dosY, (contentWidth - 80) / 2, 24);
+                dosY += 30;
+            });
+
+            // Don'ts column  
+            ctx.font = 'bold 24px Arial';
+            ctx.fillStyle = '#e53e3e';
+            ctx.fillText('✗ Avoid:', padding + 40 + (contentWidth / 2), yPos + 90);
+            
+            ctx.font = '18px Arial';
+            ctx.fillStyle = '#2d3748';
+            let dontsY = yPos + 120;
+            results.recommendations.donts.slice(0, 4).forEach(item => {
+                wrapText(ctx, `• ${item}`, padding + 40 + (contentWidth / 2), dontsY, (contentWidth - 80) / 2, 24);
+                dontsY += 30;
+            });
+
+            // Footer
+            const footerY = canvas.height - 120;
+            ctx.font = '16px Arial';
             ctx.fillStyle = '#718096';
             ctx.textAlign = 'center';
-            ctx.fillText(`Generated on ${new Date().toLocaleDateString()}`, canvas.width / 2, canvas.height - 80);
+            ctx.fillText(`Generated on: ${timestamp}`, canvas.width / 2, footerY);
+            ctx.fillText(`Take your free personality test on: ${currentURL}`, canvas.width / 2, footerY + 25);
 
-            // Download image
+            // Convert canvas to blob and download
             canvas.toBlob(blob => {
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `personality-assessment-${results.mbtiType}.png`;
+                a.download = `personality-assessment-${results.mbtiType}-${fileTimestamp}.png`;
                 a.click();
                 window.URL.revokeObjectURL(url);
+
+                // Generate share message
+                const shareMessage = generateShareMessage(results, currentURL);
+                
+                // Copy to clipboard if supported
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(shareMessage).then(() => {
+                        alert('Image downloaded! A shareable message has been copied to your clipboard. You can paste it when sharing the image on social media.');
+                    });
+                } else {
+                    // Fallback - show message in alert
+                    alert(`Image downloaded! Here's a message you can copy and share with the image:\n\n${shareMessage}`);
+                }
             });
+        }
+
+        // Generate share message
+        function generateShareMessage(results, currentURL) {
+            const messages = [
+                `Just discovered I'm an ${results.mbtiType}! 🎯 This personality assessment gave me amazing insights into my strengths and career paths.`,
+                `My personality assessment results are in - I'm an ${results.mbtiType}! 💫 Really interesting to see how my traits align with different career opportunities.`,
+                `Took this insightful personality test and learned I'm an ${results.mbtiType}! 🧠 The professional recommendations were spot-on.`,
+                `Found out I'm an ${results.mbtiType} personality type! ✨ This free assessment provided valuable insights into my working style and preferences.`
+            ];
+            
+            const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+            
+            return `${randomMessage}
+
+Want to discover your personality type too? Take the free assessment here: ${currentURL}
+
+#PersonalityTest #MBTI #${results.mbtiType} #CareerInsights #PersonalityAssessment`;
         }
 
         // Utility Functions

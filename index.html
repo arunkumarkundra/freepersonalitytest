@@ -409,9 +409,9 @@
                 </div>
 
                 <div class="export-buttons">
-                    <button class="export-btn" onclick="exportPDF()">Export as PDF</button>
-                    <button class="export-btn" onclick="exportJSON()">Export as JSON</button>
-                    <button class="export-btn" onclick="shareAsImage()">Share as Image</button>
+                    <button class="export-btn" onclick="DownloadHTML()">Download</button>
+             //       <button class="export-btn" onclick="exportJSON()">Export as JSON</button>
+                    <button class="export-btn" onclick="shareAsImage()">Share</button>
                 </div>
 
                 <button class="restart-btn" onclick="restartAssessment()">Take Assessment Again</button>
@@ -847,7 +847,7 @@
         }
 
         // Export Functions
-        function exportPDF() {
+        function DownloadHTML() {
             const results = window.assessmentResults;
             const timestamp = new Date().toLocaleString();
             const currentURL = window.location.href;
@@ -1040,7 +1040,7 @@
             window.URL.revokeObjectURL(url);
             
             // Show instruction to user
-            alert('Your results have been downloaded as an HTML file. You can open it in your browser and use "Print to PDF" to save as a PDF document.');
+            // alert('Your results have been downloaded as an HTML file. You can open it in your browser and use "Print to PDF" to save as a PDF document.');
         }
 
         function exportJSON() {

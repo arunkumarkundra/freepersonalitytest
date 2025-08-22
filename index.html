@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personality Insight - Discover Your True Self</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            max-width: 600px;
+            width: 100%;
+            min-height: 500px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .screen {
+            display: none;
+            flex: 1;
+        }
+
+        .screen.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Welcome Screen */
+        .welcome-screen {
+            padding: 60px 40px;
+            text-align: center;
+            justify-content: center;
+        }
+
+        .welcome-screen h1 {
+            color: #2d3748;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .welcome-screen p {
+            color: #4a5568;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 40px;
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            height: 8px;
+            background: #e2e8f0;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            padding: 20px 40px 0;
+            color: #4a5568;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        /* Question Screen */
+        .question-screen {
+            padding: 40px;
+            justify-content: center;
+        }
+
+        .question-card {
+            text-align: center;
+        }
+
+        .question-card h2 {
+            color: #2d3748;
+            font-size: 1.5rem;
+            margin-bottom: 40px;
+            line-height: 1.4;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .option {
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 15px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            background: #edf2f7;
+            transform: translateY(-2px);
+        }
+
+        .option-text {
+            color: #2d3748;
+            font-size: 1rem;
+            line-height: 1.4;
+        }
+
+        /* Results Screen */
+        .results-screen {
+            padding: 40px;
+            overflow-y: auto;
+        }
+
+        .results-title {
+            color: #2d3748;
+            font-size: 2rem;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .result-section {
+            margin-bottom: 30px;
+            padding: 25px;
+            background: #f7fafc;
+            border-radius: 15px;
+        }
+
+        .result-section h3 {
+            color: #667eea;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+        }
+
+        .mbti-type {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #764ba2;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .trait-bar {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .trait-label {
+            width: 140px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .trait-progress {
+            flex: 1;
+            height: 10px;
+            background: #e2e8f0;
+            border-radius: 5px;
+            margin: 0 15px;
+            overflow: hidden;
+        }
+
+        .trait-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 5px;
+            transition: width 0.8s ease;
+        }
+
+        .trait-score {
+            width: 40px;
+            text-align: center;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .recommendations {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .rec-column {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .rec-column.donts {
+            border-left-color: #e53e3e;
+        }
+
+        .rec-column h4 {
+            color: #2d3748;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .rec-column ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .rec-column li {
+            color: #4a5568;
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .rec-column li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #48bb78;
+            font-weight: bold;
+        }
+
+        .rec-column.donts li:before {
+            content: "✗";
+            color: #e53e3e;
+        }
+
+        .export-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .export-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .export-btn:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+
+        .restart-btn {
+            background: #e53e3e;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 20px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .restart-btn:hover {
+            background: #c53030;
+            transform: translateY(-2px);
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+
+            .welcome-screen {
+                padding: 40px 30px;
+            }
+
+            .welcome-screen h1 {
+                font-size: 2rem;
+            }
+
+            .question-screen {
+                padding: 30px 25px;
+            }
+
+            .results-screen {
+                padding: 30px 25px;
+            }
+
+            .recommendations {
+                grid-template-columns: 1fr;
+            }
+
+            .export-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Welcome Screen -->
+        <div class="screen active" id="welcome-screen">
+            <div class="welcome-screen">
+                <h1>Personality Insight</h1>
+                <p>Discover your unique personality traits and unlock insights about your strengths, preferences, and potential career paths.</p>
+                <p><strong>Instructions:</strong> Pick the better of the two options for each question. There are no right or wrong answers - choose what feels most natural to you.</p>
+                <button class="start-btn" onclick="startAssessment()">Start Assessment</button>
+            </div>
+        </div>
+
+        <!-- Question Screen -->
+        <div class="screen" id="question-screen">
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <div class="progress-text" id="progress-text">Question 1 of 25</div>
+            <div class="question-screen">
+                <div class="question-card">
+                    <h2 id="question-text"></h2>
+                    <div class="options" id="options-container"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div class="screen" id="results-screen">
+            <div class="results-screen">
+                <h1 class="results-title">Your Personality Profile</h1>
+                
+                <div class="result-section">
+                    <h3>Personality Analysis</h3>
+                    <p id="personality-analysis"></p>
+                </div>
+
+                <div class="result-section">
+                    <h3>MBTI Type</h3>
+                    <div class="mbti-type" id="mbti-type"></div>
+                    <p id="mbti-description"></p>
+                </div>
+
+                <div class="result-section">
+                    <h3>Big Five Traits</h3>
+                    <div id="big-five-traits"></div>
+                </div>
+
+                <div class="result-section">
+                    <h3>Professional Recommendations</h3>
+                    <div class="recommendations">
+                        <div class="rec-column">
+                            <h4>Do's - Suitable For:</h4>
+                            <ul id="recommendations-dos"></ul>
+                        </div>
+                        <div class="rec-column donts">
+                            <h4>Don'ts - Avoid:</h4>
+                            <ul id="recommendations-donts"></ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="result-section">
+                    <p style="text-align: center; color: #667eea; font-style: italic;">
+                        "This is a starting point to explore your strengths. Remember, you have the power to grow and adapt in any direction you choose!"
+                    </p>
+                </div>
+
+                <div class="export-buttons">
+                    <button class="export-btn" onclick="exportPDF()">Export as PDF</button>
+                    <button class="export-btn" onclick="exportJSON()">Export as JSON</button>
+                    <button class="export-btn" onclick="exportImage()">Export as Image</button>
+                </div>
+
+                <button class="restart-btn" onclick="restartAssessment()">Take Assessment Again</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Question Repository - 25 carefully crafted questions
+        const questions = [
+            {
+                question: "At a social gathering, you typically:",
+                optionA: { text: "Seek out conversations with new people and enjoy meeting everyone", traits: { E: 1, openness: 0.5, extraversion: 1 } },
+                optionB: { text: "Prefer meaningful conversations with a few close friends", traits: { I: 1, agreeableness: 0.5, extraversion: -1 } }
+            },
+            {
+                question: "When making important decisions, you rely more on:",
+                optionA: { text: "Logical analysis and objective facts", traits: { T: 1, conscientiousness: 0.5 } },
+                optionB: { text: "Personal values and how it affects others", traits: { F: 1, agreeableness: 1 } }
+            },
+            {
+                question: "You prefer to:",
+                optionA: { text: "Plan your day in advance and stick to the schedule", traits: { J: 1, conscientiousness: 1 } },
+                optionB: { text: "Keep your options open and be spontaneous", traits: { P: 1, openness: 1, neuroticism: -0.5 } }
+            },
+            {
+                question: "When learning something new, you:",
+                optionA: { text: "Focus on the big picture and future possibilities", traits: { N: 1, openness: 1 } },
+                optionB: { text: "Prefer step-by-step instructions and practical examples", traits: { S: 1, conscientiousness: 0.5 } }
+            },
+            {
+                question: "In a work environment, you thrive when:",
+                optionA: { text: "Working independently with minimal supervision", traits: { I: 1, conscientiousness: 0.5, extraversion: -0.5 } },
+                optionB: { text: "Collaborating frequently with team members", traits: { E: 1, agreeableness: 0.5, extraversion: 1 } }
+            },
+            {
+                question: "When faced with a problem, your first instinct is to:",
+                optionA: { text: "Analyze the situation systematically and logically", traits: { T: 1, conscientiousness: 1 } },
+                optionB: { text: "Consider how it impacts people's feelings and relationships", traits: { F: 1, agreeableness: 1 } }
+            },
+            {
+                question: "You feel more energized after:",
+                optionA: { text: "A lively party or social event", traits: { E: 1, extraversion: 1 } },
+                optionB: { text: "Quiet time alone or with close friends", traits: { I: 1, extraversion: -1 } }
+            },
+            {
+                question: "Your ideal vacation would be:",
+                optionA: { text: "A well-planned itinerary visiting famous landmarks", traits: { J: 1, S: 0.5, conscientiousness: 1 } },
+                optionB: { text: "An adventure with flexibility to explore wherever interests you", traits: { P: 1, N: 0.5, openness: 1 } }
+            },
+            {
+                question: "When reading a book, you prefer:",
+                optionA: { text: "Practical guides and factual information", traits: { S: 1, conscientiousness: 0.5 } },
+                optionB: { text: "Creative fiction and theoretical concepts", traits: { N: 1, openness: 1 } }
+            },
+            {
+                question: "In group projects, you typically:",
+                optionA: { text: "Take charge and organize the team's efforts", traits: { E: 0.5, J: 1, extraversion: 0.5, conscientiousness: 1 } },
+                optionB: { text: "Contribute your expertise while letting others lead", traits: { I: 0.5, P: 0.5, agreeableness: 1 } }
+            },
+            {
+                question: "You handle criticism by:",
+                optionA: { text: "Analyzing it objectively for areas to improve", traits: { T: 1, conscientiousness: 0.5, neuroticism: -0.5 } },
+                optionB: { text: "Considering the person's feelings and intentions behind it", traits: { F: 1, agreeableness: 0.5 } }
+            },
+            {
+                question: "Your workspace is typically:",
+                optionA: { text: "Organized and systematically arranged", traits: { J: 1, conscientiousness: 1 } },
+                optionB: { text: "Flexible with items placed where convenient", traits: { P: 1, openness: 0.5 } }
+            },
+            {
+                question: "When meeting new people, you:",
+                optionA: { text: "Easily start conversations and share personal stories", traits: { E: 1, extraversion: 1, agreeableness: 0.5 } },
+                optionB: { text: "Wait for others to initiate and listen more than you speak", traits: { I: 1, extraversion: -1 } }
+            },
+            {
+                question: "You prefer jobs that:",
+                optionA: { text: "Have clear procedures and predictable outcomes", traits: { S: 1, J: 0.5, conscientiousness: 1 } },
+                optionB: { text: "Offer variety and opportunities for innovation", traits: { N: 1, P: 0.5, openness: 1 } }
+            },
+            {
+                question: "When making team decisions, you:",
+                optionA: { text: "Focus on efficiency and logical outcomes", traits: { T: 1, conscientiousness: 0.5 } },
+                optionB: { text: "Ensure everyone's opinions are heard and considered", traits: { F: 1, agreeableness: 1 } }
+            },
+            {
+                question: "You feel most comfortable with:",
+                optionA: { text: "Detailed plans and clear deadlines", traits: { J: 1, conscientiousness: 1, neuroticism: -0.5 } },
+                optionB: { text: "Flexible goals and adaptable timelines", traits: { P: 1, openness: 0.5 } }
+            },
+            {
+                question: "Your learning style involves:",
+                optionA: { text: "Hands-on experience and concrete examples", traits: { S: 1, conscientiousness: 0.5 } },
+                optionB: { text: "Theoretical concepts and abstract ideas", traits: { N: 1, openness: 1 } }
+            },
+            {
+                question: "In social situations, you:",
+                optionA: { text: "Actively participate and guide conversations", traits: { E: 1, extraversion: 1 } },
+                optionB: { text: "Observe carefully and contribute thoughtfully", traits: { I: 1, conscientiousness: 0.5, extraversion: -1 } }
+            },
+            {
+                question: "When conflicts arise, you:",
+                optionA: { text: "Address the logical issues directly and objectively", traits: { T: 1, conscientiousness: 0.5 } },
+                optionB: { text: "Focus on maintaining harmony and understanding feelings", traits: { F: 1, agreeableness: 1 } }
+            },
+            {
+                question: "You approach deadlines by:",
+                optionA: { text: "Starting early and working steadily toward completion", traits: { J: 1, conscientiousness: 1 } },
+                optionB: { text: "Working in bursts of energy, often closer to the deadline", traits: { P: 1, openness: 0.5, neuroticism: 0.5 } }
+            },
+            {
+                question: "Your ideal work environment includes:",
+                optionA: { text: "Lots of interaction and collaborative energy", traits: { E: 1, extraversion: 1, agreeableness: 0.5 } },
+                optionB: { text: "Quiet focus time with minimal interruptions", traits: { I: 1, conscientiousness: 0.5, extraversion: -1 } }
+            },
+            {
+                question: "When solving problems, you prefer to:",
+                optionA: { text: "Use proven methods and reliable solutions", traits: { S: 1, conscientiousness: 1 } },
+                optionB: { text: "Explore creative alternatives and innovative approaches", traits: { N: 1, openness: 1 } }
+            },
+            {
+                question: "You make your best decisions when you:",
+                optionA: { text: "Have analyzed all the data and facts thoroughly", traits: { T: 1, conscientiousness: 1 } },
+                optionB: { text: "Have considered the impact on people and relationships", traits: { F: 1, agreeableness: 1 } }
+            },
+            {
+                question: "Your schedule preferences lean toward:",
+                optionA: { text: "Structured routines and predictable patterns", traits: { J: 1, conscientiousness: 1, neuroticism: -0.5 } },
+                optionB: { text: "Flexible arrangements that allow for spontaneity", traits: { P: 1, openness: 1 } }
+            },
+            {
+                question: "You recharge best through:",
+                optionA: { text: "Social activities and being around others", traits: { E: 1, extraversion: 1, agreeableness: 0.5 } },
+                optionB: { text: "Solitary activities and personal reflection", traits: { I: 1, extraversion: -1, conscientiousness: 0.5 } }
+            }
+        ];
+
+        // MBTI Type Descriptions
+        const mbtiDescriptions = {
+            "INTJ": "The Architect - Strategic thinkers with a vision for improving systems and processes.",
+            "INTP": "The Thinker - Innovative inventors with an unquenchable thirst for knowledge.",
+            "ENTJ": "The Commander - Bold, imaginative leaders who always find a way forward.",
+            "ENTP": "The Debater - Smart and curious thinkers who love intellectual challenges.",
+            "INFJ": "The Advocate - Creative and insightful, inspired and independent idealists.",
+            "INFP": "The Mediator - Poetic, kind and altruistic, always eager to help good causes.",
+            "ENFJ": "The Protagonist - Charismatic and inspiring leaders, able to mesmerize listeners.",
+            "ENFP": "The Campaigner - Enthusiastic, creative and sociable free spirits.",
+            "ISTJ": "The Logistician - Practical and fact-minded, reliable and responsible.",
+            "ISFJ": "The Protector - Warm-hearted and dedicated, always ready to protect loved ones.",
+            "ESTJ": "The Executive - Excellent administrators, unsurpassed at managing things or people.",
+            "ESFJ": "The Consul - Extraordinarily caring, social and popular people, always eager to help.",
+            "ISTP": "The Virtuoso - Bold and practical experimenters, masters of all kinds of tools.",
+            "ISFP": "The Adventurer - Flexible and charming artists, always ready to explore new possibilities.",
+            "ESTP": "The Entrepreneur - Smart, energetic and perceptive people, truly enjoy living on the edge.",
+            "ESFP": "The Entertainer - Spontaneous, energetic and enthusiastic people - life is never boring."
+        };
+
+        // Professional Recommendations
+        const recommendations = {
+            "INTJ": {
+                dos: ["Strategic planning roles", "Research and analysis", "Independent consulting", "Technology leadership", "Systems architecture"],
+                donts: ["High-pressure sales", "Routine administrative tasks", "Customer service roles", "Jobs requiring constant socializing", "Micromanaged positions"]
+            },
+            "INTP": {
+                dos: ["Research and development", "Software engineering", "Academic positions", "Data analysis", "Innovation consulting"],
+                donts: ["Strict deadline environments", "Routine clerical work", "High-pressure sales", "Jobs with excessive meetings", "Roles requiring emotional labor"]
+            },
+            "ENTJ": {
+                dos: ["Executive leadership", "Business strategy", "Entrepreneurship", "Management consulting", "Corporate development"],
+                donts: ["Detailed administrative work", "Subordinate positions long-term", "Jobs without growth potential", "Highly regulated environments", "Roles without decision-making power"]
+            },
+            "ENTP": {
+                dos: ["Innovation roles", "Business development", "Marketing and advertising", "Consulting", "Entrepreneurship"],
+                donts: ["Routine operational work", "Highly structured environments", "Detail-oriented positions", "Jobs with little variety", "Roles requiring extensive documentation"]
+            },
+            "INFJ": {
+                dos: ["Counseling and therapy", "Non-profit work", "Writing and content creation", "Human resources", "Educational roles"],
+                donts: ["High-pressure sales", "Competitive environments", "Jobs without meaning", "Purely profit-driven roles", "Positions with ethical conflicts"]
+            },
+            "INFP": {
+                dos: ["Creative writing", "Counseling", "Non-profit work", "Arts and design", "Social work"],
+                donts: ["High-stress environments", "Competitive sales roles", "Jobs conflicting with values", "Micromanaged positions", "Purely analytical work"]
+            },
+            "ENFJ": {
+                dos: ["Teaching and training", "Human resources", "Counseling", "Team leadership", "Non-profit leadership"],
+                donts: ["Isolated work environments", "Purely analytical roles", "High-conflict positions", "Jobs without people interaction", "Roles that harm others"]
+            },
+            "ENFP": {
+                dos: ["Marketing and PR", "Creative roles", "Human resources", "Counseling", "Event planning"],
+                donts: ["Routine data entry", "Highly structured environments", "Isolated work", "Detail-focused positions", "Jobs without variety"]
+            },
+            "ISTJ": {
+                dos: ["Accounting and finance", "Project management", "Operations management", "Quality assurance", "Administration"],
+                donts: ["Chaotic environments", "Jobs requiring constant change", "High-pressure creative roles", "Unstructured positions", "Roles without clear procedures"]
+            },
+            "ISFJ": {
+                dos: ["Healthcare roles", "Education", "Human resources", "Customer service", "Administrative support"],
+                donts: ["High-conflict environments", "Competitive sales", "Jobs without helping others", "Roles requiring confrontation", "Purely profit-focused positions"]
+            },
+            "ESTJ": {
+                dos: ["Management and supervision", "Operations leadership", "Sales management", "Project management", "Business administration"],
+                donts: ["Unstructured creative roles", "Jobs without clear hierarchy", "Positions requiring constant change", "Roles without authority", "Highly theoretical work"]
+            },
+            "ESFJ": {
+                dos: ["Human resources", "Healthcare", "Education", "Customer relations", "Event coordination"],
+                donts: ["Isolated analytical work", "High-conflict environments", "Jobs without people interaction", "Roles that harm relationships", "Purely technical positions"]
+            },
+            "ISTP": {
+                dos: ["Technical roles", "Engineering", "Skilled trades", "IT support", "Hands-on problem solving"],
+                donts: ["Excessive meetings", "Jobs requiring emotional labor", "Highly social environments", "Roles with strict procedures", "Positions without autonomy"]
+            },
+            "ISFP": {
+                dos: ["Arts and crafts", "Healthcare support", "Social work", "Environmental work", "Flexible creative roles"],
+                donts: ["High-pressure environments", "Competitive sales", "Strict corporate hierarchies", "Jobs conflicting with values", "Highly structured positions"]
+            },
+            "ESTP": {
+                dos: ["Sales and marketing", "Emergency services", "Sports and fitness", "Entrepreneurship", "Field work"],
+                donts: ["Desk jobs with little variety", "Highly theoretical work", "Long-term planning roles", "Jobs requiring extensive documentation", "Isolated positions"]
+            },
+            "ESFP": {
+                dos: ["Entertainment industry", "Sales and marketing", "Healthcare", "Education", "Event planning"],
+                donts: ["Highly analytical roles", "Jobs with little people interaction", "Strict corporate environments", "Long-term strategic planning", "Isolated desk work"]
+            }
+        };
+
+        // Assessment State
+        let currentQuestion = 0;
+        let answers = [];
+        let scores = {
+            E: 0, I: 0, N: 0, S: 0, T: 0, F: 0, J: 0, P: 0,
+            openness: 0, conscientiousness: 0, extraversion: 0, agreeableness: 0, neuroticism: 0
+        };
+
+        // Start Assessment
+        function startAssessment() {
+            showScreen('question-screen');
+            displayQuestion();
+        }
+
+        // Display Current Question
+        function displayQuestion() {
+            const question = questions[currentQuestion];
+            document.getElementById('question-text').textContent = question.question;
+            document.getElementById('progress-text').textContent = `Question ${currentQuestion + 1} of ${questions.length}`;
+            
+            // Update progress bar
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progress-bar').style.width = progress + '%';
+
+            // Create options
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+
+            const optionA = createOption('A', question.optionA);
+            const optionB = createOption('B', question.optionB);
+            
+            optionsContainer.appendChild(optionA);
+            optionsContainer.appendChild(optionB);
+        }
+
+        // Create Option Element
+        function createOption(letter, option) {
+            const optionDiv = document.createElement('div');
+            optionDiv.className = 'option';
+            optionDiv.innerHTML = `<div class="option-text">${option.text}</div>`;
+            
+            optionDiv.addEventListener('click', () => selectAnswer(option));
+            return optionDiv;
+        }
+
+        // Handle Answer Selection
+        function selectAnswer(selectedOption) {
+            answers.push(selectedOption);
+            
+            // Update scores
+            for (const [trait, value] of Object.entries(selectedOption.traits)) {
+                scores[trait] += value;
+            }
+
+            currentQuestion++;
+
+            // Move to next question or show results
+            if (currentQuestion < questions.length) {
+                setTimeout(() => displayQuestion(), 300);
+            } else {
+                setTimeout(() => showResults(), 500);
+            }
+        }
+
+        // Show Results
+        function showResults() {
+            calculateResults();
+            showScreen('results-screen');
+            animateResults();
+        }
+
+        // Calculate Final Results
+        function calculateResults() {
+            // Calculate MBTI Type
+            const mbtiType = 
+                (scores.E > scores.I ? 'E' : 'I') +
+                (scores.N > scores.S ? 'N' : 'S') +
+                (scores.T > scores.F ? 'T' : 'F') +
+                (scores.J > scores.P ? 'J' : 'P');
+
+            // Normalize Big Five scores (convert to 0-100 scale)
+            const maxScore = questions.length;
+            const bigFive = {
+                openness: Math.max(0, Math.min(100, ((scores.openness / maxScore) * 100) + 50)),
+                conscientiousness: Math.max(0, Math.min(100, ((scores.conscientiousness / maxScore) * 100) + 50)),
+                extraversion: Math.max(0, Math.min(100, ((scores.extraversion / maxScore) * 100) + 50)),
+                agreeableness: Math.max(0, Math.min(100, ((scores.agreeableness / maxScore) * 100) + 50)),
+                neuroticism: Math.max(0, Math.min(100, ((scores.neuroticism / maxScore) * 100) + 50))
+            };
+
+            // Display results
+            document.getElementById('mbti-type').textContent = mbtiType;
+            document.getElementById('mbti-description').textContent = mbtiDescriptions[mbtiType];
+            
+            // Generate personality analysis
+            generatePersonalityAnalysis(mbtiType, bigFive);
+            
+            // Display Big Five traits
+            displayBigFiveTraits(bigFive);
+            
+            // Display recommendations
+            displayRecommendations(mbtiType);
+            
+            // Store results for export
+            window.assessmentResults = {
+                mbtiType,
+                mbtiDescription: mbtiDescriptions[mbtiType],
+                bigFive,
+                recommendations: recommendations[mbtiType],
+                personalityAnalysis: generatePersonalityAnalysisText(mbtiType, bigFive)
+            };
+        }
+
+        // Generate Personality Analysis
+        function generatePersonalityAnalysis(mbtiType, bigFive) {
+            const analysis = generatePersonalityAnalysisText(mbtiType, bigFive);
+            document.getElementById('personality-analysis').textContent = analysis;
+        }
+
+        // Generate Personality Analysis Text
+        function generatePersonalityAnalysisText(mbtiType, bigFive) {
+            const traits = [];
+            
+            // Analyze MBTI dimensions
+            if (mbtiType.includes('E')) traits.push("socially energetic");
+            else traits.push("introspectively focused");
+            
+            if (mbtiType.includes('N')) traits.push("future-oriented and imaginative");
+            else traits.push("practical and detail-oriented");
+            
+            if (mbtiType.includes('T')) traits.push("logically driven");
+            else traits.push("value-centered");
+            
+            if (mbtiType.includes('J')) traits.push("organized and decisive");
+            else traits.push("flexible and adaptable");
+
+            // Analyze Big Five highlights
+            if (bigFive.openness > 70) traits.push("highly creative and open to new experiences");
+            if (bigFive.conscientiousness > 70) traits.push("exceptionally reliable and disciplined");
+            if (bigFive.agreeableness > 70) traits.push("naturally cooperative and empathetic");
+
+            const analysis = `You are a ${mbtiType} personality type, characterized as ${traits.slice(0, 3).join(", ")}. Your unique combination of traits suggests you excel in environments that value ${mbtiType.includes('T') ? 'analytical thinking' : 'interpersonal harmony'} and ${mbtiType.includes('J') ? 'structured approaches' : 'creative flexibility'}. You likely find fulfillment in work that aligns with your ${mbtiType.includes('N') ? 'visionary' : 'practical'} nature and allows you to utilize your ${mbtiType.includes('E') ? 'collaborative' : 'independent'} working style.`;
+            
+            return analysis;
+        }
+
+        // Display Big Five Traits
+        function displayBigFiveTraits(bigFive) {
+            const traitsContainer = document.getElementById('big-five-traits');
+            traitsContainer.innerHTML = '';
+
+            const traitNames = {
+                openness: 'Openness',
+                conscientiousness: 'Conscientiousness', 
+                extraversion: 'Extraversion',
+                agreeableness: 'Agreeableness',
+                neuroticism: 'Neuroticism'
+            };
+
+            for (const [trait, score] of Object.entries(bigFive)) {
+                const traitDiv = document.createElement('div');
+                traitDiv.className = 'trait-bar';
+                
+                traitDiv.innerHTML = `
+                    <div class="trait-label">${traitNames[trait]}</div>
+                    <div class="trait-progress">
+                        <div class="trait-fill" data-width="${score}"></div>
+                    </div>
+                    <div class="trait-score">${Math.round(score)}</div>
+                `;
+                
+                traitsContainer.appendChild(traitDiv);
+            }
+        }
+
+        // Display Recommendations
+        function displayRecommendations(mbtiType) {
+            const dosContainer = document.getElementById('recommendations-dos');
+            const dontsContainer = document.getElementById('recommendations-donts');
+            
+            dosContainer.innerHTML = '';
+            dontsContainer.innerHTML = '';
+
+            const typeRecs = recommendations[mbtiType];
+
+            typeRecs.dos.forEach(item => {
+                const li = document.createElement('li');
+                li.textContent = item;
+                dosContainer.appendChild(li);
+            });
+
+            typeRecs.donts.forEach(item => {
+                const li = document.createElement('li');
+                li.textContent = item;
+                dontsContainer.appendChild(li);
+            });
+        }
+
+        // Animate Results
+        function animateResults() {
+            setTimeout(() => {
+                const traitFills = document.querySelectorAll('.trait-fill');
+                traitFills.forEach(fill => {
+                    const width = fill.dataset.width;
+                    fill.style.width = width + '%';
+                });
+            }, 500);
+        }
+
+        // Export Functions
+        function exportPDF() {
+            const results = window.assessmentResults;
+            let pdfContent = `
+PERSONALITY ASSESSMENT RESULTS
+================================
+
+MBTI Type: ${results.mbtiType}
+${results.mbtiDescription}
+
+PERSONALITY ANALYSIS:
+${results.personalityAnalysis}
+
+BIG FIVE TRAITS:
+- Openness: ${Math.round(results.bigFive.openness)}%
+- Conscientiousness: ${Math.round(results.bigFive.conscientiousness)}%
+- Extraversion: ${Math.round(results.bigFive.extraversion)}%
+- Agreeableness: ${Math.round(results.bigFive.agreeableness)}%
+- Neuroticism: ${Math.round(results.bigFive.neuroticism)}%
+
+PROFESSIONAL RECOMMENDATIONS:
+
+DO'S - Suitable For:
+${results.recommendations.dos.map(item => `• ${item}`).join('\n')}
+
+DON'TS - Avoid:
+${results.recommendations.donts.map(item => `• ${item}`).join('\n')}
+
+Generated on: ${new Date().toLocaleDateString()}
+            `;
+
+            // Create and download PDF as text file (simplified)
+            const blob = new Blob([pdfContent], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `personality-assessment-${results.mbtiType}.txt`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        function exportJSON() {
+            const results = window.assessmentResults;
+            const jsonData = {
+                ...results,
+                exportDate: new Date().toISOString(),
+                version: "1.0"
+            };
+
+            const blob = new Blob([JSON.stringify(jsonData, null, 2)], { type: 'application/json' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `personality-assessment-${results.mbtiType}.json`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        function exportImage() {
+            const results = window.assessmentResults;
+            
+            // Create canvas for image generation
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 800;
+            canvas.height = 1000;
+
+            // Background gradient
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, '#667eea');
+            gradient.addColorStop(1, '#764ba2');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // White content area
+            ctx.fillStyle = 'white';
+            ctx.fillRect(50, 50, canvas.width - 100, canvas.height - 100);
+
+            // Title
+            ctx.fillStyle = '#2d3748';
+            ctx.font = 'bold 36px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Personality Assessment', canvas.width / 2, 120);
+
+            // MBTI Type
+            ctx.font = 'bold 72px Arial';
+            ctx.fillStyle = '#764ba2';
+            ctx.fillText(results.mbtiType, canvas.width / 2, 220);
+
+            // Description
+            ctx.font = '18px Arial';
+            ctx.fillStyle = '#4a5568';
+            ctx.fillText(results.mbtiDescription, canvas.width / 2, 260);
+
+            // Big Five Traits
+            ctx.textAlign = 'left';
+            ctx.font = 'bold 24px Arial';
+            ctx.fillStyle = '#2d3748';
+            ctx.fillText('Big Five Traits:', 100, 320);
+
+            ctx.font = '18px Arial';
+            ctx.fillStyle = '#4a5568';
+            let yPos = 360;
+            for (const [trait, score] of Object.entries(results.bigFive)) {
+                const traitNames = {
+                    openness: 'Openness',
+                    conscientiousness: 'Conscientiousness', 
+                    extraversion: 'Extraversion',
+                    agreeableness: 'Agreeableness',
+                    neuroticism: 'Neuroticism'
+                };
+                ctx.fillText(`${traitNames[trait]}: ${Math.round(score)}%`, 100, yPos);
+                yPos += 30;
+            }
+
+            // Generate date
+            ctx.font = '14px Arial';
+            ctx.fillStyle = '#718096';
+            ctx.textAlign = 'center';
+            ctx.fillText(`Generated on ${new Date().toLocaleDateString()}`, canvas.width / 2, canvas.height - 80);
+
+            // Download image
+            canvas.toBlob(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `personality-assessment-${results.mbtiType}.png`;
+                a.click();
+                window.URL.revokeObjectURL(url);
+            });
+        }
+
+        // Utility Functions
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function restartAssessment() {
+            // Reset all variables
+            currentQuestion = 0;
+            answers = [];
+            scores = {
+                E: 0, I: 0, N: 0, S: 0, T: 0, F: 0, J: 0, P: 0,
+                openness: 0, conscientiousness: 0, extraversion: 0, agreeableness: 0, neuroticism: 0
+            };
+            
+            // Show welcome screen
+            showScreen('welcome-screen');
+        }
+    </script>
+</body>
+</html>

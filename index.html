@@ -1064,20 +1064,63 @@
         }
 
         function shareAsImage() {
-            const resultsScreen = document.getElementById('results-screen');
-            if (!resultsScreen) {
-                alert('Results screen not found. Please complete the assessment first.');
+            const resultsContent = document.querySelector('#results-screen .results-screen');
+            if (!resultsContent) {
+                alert('Results content not found. Please complete the assessment first.');
                 return;
             }
         
-            // Use html2canvas to render the results screen to a canvas
-            html2canvas(resultsScreen, {
-                scale: 2, // Increase resolution for better image quality
-                useCORS: true // Required for some browsers
+            // Temporarily hide the buttons and footer for the screenshot
+            const buttonsSection = document.querySelector('.export-buttons');
+            const restartButton = document.querySelector('.restart-btn');
+            const originalDisplayButtons = buttonsSection ? buttonsSection.style.display : null;
+            const originalDisplayRestart = restartButton ? restartButton.style.display : null;
+            if (buttonsSection) buttonsSection.style.display = 'none';
+            if (restartButton) restartButton.style.display = 'none';
+            
+            // Create the footer element to be appended to the cloned node for capture
+            const footerElement = document.createElement('div');
+            footerElement.style.textAlign = 'center';
+            footerElement.style.padding = '20px 0 10px';
+            footerElement.style.borderTop = '1px solid #e2e8f0';
+            footerElement.style.color = '#718096';
+            footerElement.style.fontSize = '12px';
+            footerElement.innerHTML = `
+                <p>Generated on: ${new Date().toLocaleString()}</p>
+                <p>Take your free personality test on: <a href="${window.location.href}">${window.location.href}</a></p>
+            `;
+            
+            // Clone the results screen content to add the footer without altering the original page
+            const contentToCapture = resultsContent.cloneNode(true);
+            contentToCapture.style.backgroundColor = 'white';
+            contentToCapture.style.padding = '40px';
+            contentToCapture.style.minHeight = 'auto'; // Prevent capture of empty space
+            contentToCapture.appendChild(footerElement);
+        
+            // Create a temporary container to render the cloned content for html2canvas
+            const tempContainer = document.createElement('div');
+            tempContainer.style.position = 'absolute';
+            tempContainer.style.left = '-9999px';
+            tempContainer.style.top = '-9999px';
+            tempContainer.style.width = '600px'; // Set a fixed width for consistent rendering
+            tempContainer.style.background = 'white';
+            tempContainer.appendChild(contentToCapture);
+            document.body.appendChild(tempContainer);
+        
+            html2canvas(contentToCapture, {
+                scale: 2, // Higher scale for better resolution
+                backgroundColor: null // Transparent background
             }).then(canvas => {
-                // Generate a filename
+                // Clean up the temporary elements
+                tempContainer.remove();
+        
                 const timestamp = new Date().toISOString().slice(0, 19).replace(/[:-]/g, '').replace('T', '_');
                 const filename = `personality-assessment-results-${timestamp}.png`;
+                const shareMessage = generateShareMessage(window.assessmentResults, window.location.href);
+        
+                // Restore the original display of buttons
+                if (buttonsSection) buttonsSection.style.display = originalDisplayButtons;
+                if (restartButton) restartButton.style.display = originalDisplayRestart;
         
                 // Check for Web Share API support
                 if (navigator.share) {
@@ -1086,20 +1129,31 @@
                         navigator.share({
                             files: [file],
                             title: 'My Personality Assessment Results',
-                            text: 'Check out my personality type! Find out yours with this free test.'
+                            text: shareMessage
                         }).catch(error => {
                             console.error('Sharing failed:', error);
-                            // Fallback to download if sharing fails
                             downloadCanvasImage(canvas, filename);
+                            alert("Sharing failed. The image has been downloaded instead.");
                         });
                     });
                 } else {
-                    // Fallback for browsers without Web Share API
                     downloadCanvasImage(canvas, filename);
-                    alert("Your browser doesn't support the 'Share' function. The image has been downloaded instead.");
+                    if (navigator.clipboard && shareMessage) {
+                        navigator.clipboard.writeText(shareMessage).then(() => {
+                            alert("Image downloaded! A shareable message has been copied to your clipboard.");
+                        }).catch(err => {
+                            console.error('Clipboard write failed:', err);
+                            alert("Image downloaded! You'll need to manually copy the share message.");
+                        });
+                    } else {
+                        alert("Image downloaded! Your browser doesn't support the 'Share' function or clipboard access.");
+                    }
                 }
             }).catch(error => {
                 console.error('Error generating image:', error);
+                // Ensure buttons are restored even on error
+                if (buttonsSection) buttonsSection.style.display = originalDisplayButtons;
+                if (restartButton) restartButton.style.display = originalDisplayRestart;
                 alert('Failed to create a shareable image. Please try again.');
             });
         }
@@ -1108,9 +1162,21 @@
             const link = document.createElement('a');
             link.download = filename;
             link.href = canvas.toDataURL('image/png');
+            document.body.appendChild(link);
             link.click();
+            document.body.removeChild(link);
         }
-
+        
+        function generateShareMessage(results, url) {
+            const messages = [
+                `Just discovered I'm an ${results.mbtiType}! 🎯 This personality assessment gave me amazing insights into my strengths and career paths.`,
+                `My personality assessment results are in - I'm an ${results.mbtiType}! 💫 Really interesting to see how my traits align with different career opportunities.`,
+                `Took this insightful personality test and learned I'm an ${results.mbtiType}! 🧠 The professional recommendations were spot-on.`,
+                `Found out I'm an ${results.mbtiType} personality type! ✨ This free assessment provided valuable insights into my working style and preferences.`
+            ];
+            const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+            return `${randomMessage}\n\nWant to discover your personality type too? Take the free assessment here: ${url}\n\n#PersonalityTest #MBTI #${results.mbtiType} #CareerInsights #PersonalityAssessment`;
+        }
         
         function GrokshareAsImage() {
             // Validate assessment results

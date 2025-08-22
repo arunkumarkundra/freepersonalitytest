@@ -410,7 +410,6 @@
 
                 <div class="export-buttons">
                     <button class="export-btn" onclick="DownloadHTML()">Download</button>
-             //       <button class="export-btn" onclick="exportJSON()">Export as JSON</button>
                     <button class="export-btn" onclick="shareAsImage()">Share</button>
                 </div>
 
@@ -1025,7 +1024,7 @@
 
                 <div class="footer">
                     <p><strong>Generated on:</strong> ${timestamp}</p>
-                    <p><strong>Take your free personality test on:</strong> ${currentURL}</p>
+                    <p><strong>Take your free personality test on:</strong> <a href="${currentURL}" target="_blank">${currentURL}</a></p>
                 </div>
             </body>
             </html>`;

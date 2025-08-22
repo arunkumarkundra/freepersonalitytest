@@ -1386,20 +1386,7 @@
             };
         }
         
-        // Generate share message
-        function generateShareMessage(results, currentURL) {
-            const messages = [
-                `Just discovered I'm an ${results.mbtiType}! 🎯 This personality assessment gave me amazing insights into my strengths and career paths.`,
-                `My personality assessment results are in - I'm an ${results.mbtiType}! 💫 Really interesting to see how my traits align with different career opportunities.`,
-                `Took this insightful personality test and learned I'm an ${results.mbtiType}! 🧠 The professional recommendations were spot-on.`,
-                `Found out I'm an ${results.mbtiType} personality type! ✨ This free assessment provided valuable insights into my working style and preferences.`
-            ];
-            const randomMessage = messages[Math.floor(Math.random() * messages.length)];
-            return `${randomMessage}\n\nWant to discover your personality type too? Take the free assessment here: ${currentURL}\n\n#PersonalityTest #MBTI #${results.mbtiType} #CareerInsights #PersonalityAssessment`;
-        }
-
-
-        
+       
         function OLDshareAsImage() {
             const results = window.assessmentResults;
             const timestamp = new Date().toLocaleString();

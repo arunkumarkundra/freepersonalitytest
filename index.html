@@ -1062,6 +1062,228 @@
         }
 
         function shareAsImage() {
+            // Validate assessment results
+            const results = window.assessmentResults;
+            if (!results || !results.mbtiType || !results.mbtiDescription || !results.bigFive || !results.recommendations) {
+                alert('Error: Incomplete assessment results. Please complete the assessment first.');
+                return;
+            }
+        
+            const timestamp = new Date().toLocaleString();
+            const currentURL = window.location.href;
+            const fileTimestamp = new Date().toISOString().slice(0, 19).replace(/[:-]/g, '').replace('T', '_');
+        
+            // Create canvas
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 1080;
+            canvas.height = 1350;
+        
+            // Background gradient
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, '#667eea');
+            gradient.addColorStop(1, '#764ba2');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+            // White content area
+            const padding = 60;
+            const contentWidth = canvas.width - (padding * 2);
+            const contentHeight = canvas.height - (padding * 2);
+            ctx.fillStyle = 'white';
+            ctx.fillRect(padding, padding, contentWidth, contentHeight);
+        
+            // Helper function to wrap text
+            function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+                const words = text.split(' ');
+                let line = '';
+                let currentY = y;
+                for (let n = 0; n < words.length; n++) {
+                    const testLine = line + words[n] + ' ';
+                    const metrics = ctx.measureText(testLine);
+                    const testWidth = metrics.width;
+                    if (testWidth > maxWidth && n > 0) {
+                        ctx.fillText(line, x, currentY);
+                        line = words[n] + ' ';
+                        currentY += lineHeight;
+                    } else {
+                        line = testLine;
+                    }
+                }
+                ctx.fillText(line, x, currentY);
+                return currentY + lineHeight;
+            }
+        
+            // Title
+            ctx.fillStyle = '#2d3748';
+            ctx.font = 'bold 48px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Personality Assessment', canvas.width / 2, 140);
+        
+            // MBTI Type
+            ctx.font = 'bold 120px Arial';
+            ctx.fillStyle = '#764ba2';
+            ctx.fillText(results.mbtiType, canvas.width / 2, 280);
+        
+            // MBTI Description
+            ctx.font = '24px Arial';
+            ctx.fillStyle = '#4a5568';
+            wrapText(ctx, results.mbtiDescription, canvas.width / 2, 320, contentWidth - 40, 30);
+        
+            // Personality Analysis
+            ctx.textAlign = 'left';
+            ctx.font = 'bold 32px Arial';
+            ctx.fillStyle = '#667eea';
+            ctx.fillText('Personality Analysis', padding + 40, 420);
+            ctx.font = '20px Arial';
+            ctx.fillStyle = '#4a5568';
+            wrapText(ctx, results.personalityAnalysis, padding + 40, 460, contentWidth - 80, 28);
+        
+            // Big Five Traits
+            ctx.font = 'bold 32px Arial';
+            ctx.fillStyle = '#667eea';
+            ctx.fillText('Big Five Traits', padding + 40, 620);
+            ctx.font = '22px Arial';
+            ctx.fillStyle = '#2d3748';
+            let yPos = 670;
+            const traitNames = {
+                openness: 'Openness',
+                conscientiousness: 'Conscientiousness',
+                extraversion: 'Extraversion',
+                agreeableness: 'Agreeableness',
+                neuroticism: 'Neuroticism'
+            };
+        
+            for (const [trait, score] of Object.entries(results.bigFive)) {
+                ctx.fillText(`${traitNames[trait]}: ${Math.round(score)}%`, padding + 40, yPos);
+                const barWidth = 300;
+                const barHeight = 12;
+                const barX = padding + 400;
+                const barY = yPos - 15;
+                ctx.fillStyle = '#e2e8f0';
+                ctx.fillRect(barX, barY, barWidth, barHeight);
+                const gradient = ctx.createLinearGradient(barX, barY, barX + barWidth, barY);
+                gradient.addColorStop(0, '#667eea');
+                gradient.addColorStop(1, '#764ba2');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(barX, barY, (barWidth * score) / 100, barHeight);
+                ctx.fillStyle = '#2d3748';
+                yPos += 45;
+            }
+        
+            // Professional Recommendations
+            ctx.font = 'bold 32px Arial';
+            ctx.fillStyle = '#667eea';
+            ctx.fillText('Professional Recommendations', padding + 40, yPos + 40);
+            ctx.font = 'bold 24px Arial';
+            ctx.fillStyle = '#48bb78';
+            ctx.fillText('✓ Suitable For:', padding + 40, yPos + 90);
+            ctx.font = '18px Arial';
+            ctx.fillStyle = '#2d3748';
+            let dosY = yPos + 120;
+            results.recommendations.dos.slice(0, 4).forEach(item => {
+                wrapText(ctx, `• ${item}`, padding + 40, dosY, (contentWidth - 80) / 2, 24);
+                dosY += 30;
+            });
+        
+            ctx.font = 'bold 24px Arial';
+            ctx.fillStyle = '#e53e3e';
+            ctx.fillText('✗ Avoid:', padding + 40 + (contentWidth / 2), yPos + 90);
+            ctx.font = '18px Arial';
+            ctx.fillStyle = '#2d3748';
+            let dontsY = yPos + 120;
+            results.recommendations.donts.slice(0, 4).forEach(item => {
+                wrapText(ctx, `• ${item}`, padding + 40 + (contentWidth / 2), dontsY, (contentWidth - 80) / 2, 24);
+                dontsY += 30;
+            });
+        
+            // Footer with QR code
+            const footerY = canvas.height - 120;
+            ctx.font = '16px Arial';
+            ctx.fillStyle = '#718096';
+            ctx.textAlign = 'center';
+            ctx.fillText(`Generated on: ${timestamp}`, canvas.width / 2, footerY);
+            ctx.fillText(`Take your free personality test at:`, canvas.width / 2, footerY + 25);
+        
+            // Add QR code (requires qrcode.js library)
+            const qr = new QRCode({
+                content: currentURL,
+                container: 'canvas',
+                width: 100,
+                height: 100,
+            });
+            const qrImage = new Image();
+            qrImage.src = qr.toDataURL();
+            qrImage.onload = () => {
+                ctx.drawImage(qrImage, canvas.width / 2 - 50, footerY + 40, 100, 100);
+        
+                // Share or download logic
+                const shareMessage = generateShareMessage(results, currentURL);
+                if (navigator.share) {
+                    canvas.toBlob(async (blob) => {
+                        const file = new File([blob], `personality-assessment-${results.mbtiType}-${fileTimestamp}.png`, { type: 'image/png' });
+                        const shareData = {
+                            files: [file],
+                            text: shareMessage,
+                            title: `My ${results.mbtiType} Personality Assessment`,
+                        };
+                        try {
+                            await navigator.share(shareData);
+                        } catch (err) {
+                            console.error('Share failed:', err);
+                            // Fallback to download
+                            const url = window.URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = `personality-assessment-${results.mbtiType}-${fileTimestamp}.png`;
+                            a.click();
+                            window.URL.revokeObjectURL(url);
+                            // Copy message to clipboard
+                            if (navigator.clipboard) {
+                                navigator.clipboard.writeText(shareMessage).then(() => {
+                                    alert('Image downloaded! Shareable message copied to clipboard.');
+                                });
+                            } else {
+                                alert(`Image downloaded! Copy this message:\n\n${shareMessage}`);
+                            }
+                        }
+                    });
+                } else {
+                    // Fallback to download
+                    canvas.toBlob(blob => {
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `personality-assessment-${results.mbtiType}-${fileTimestamp}.png`;
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                        if (navigator.clipboard) {
+                            navigator.clipboard.writeText(shareMessage).then(() => {
+                                alert('Image downloaded! Shareable message copied to clipboard.');
+                            });
+                        } else {
+                            alert(`Image downloaded! Copy this message:\n\n${shareMessage}`);
+                        }
+                    });
+                }
+            };
+        }
+        
+        // Generate share message
+        function generateShareMessage(results, currentURL) {
+            const messages = [
+                `Just discovered I'm an ${results.mbtiType}! 🎯 This personality assessment gave me amazing insights into my strengths and career paths.`,
+                `My personality assessment results are in - I'm an ${results.mbtiType}! 💫 Really interesting to see how my traits align with different career opportunities.`,
+                `Took this insightful personality test and learned I'm an ${results.mbtiType}! 🧠 The professional recommendations were spot-on.`,
+                `Found out I'm an ${results.mbtiType} personality type! ✨ This free assessment provided valuable insights into my working style and preferences.`
+            ];
+            const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+            return `${randomMessage}\n\nWant to discover your personality type too? Take the free assessment here: ${currentURL}\n\n#PersonalityTest #MBTI #${results.mbtiType} #CareerInsights #PersonalityAssessment`;
+        }
+
+
+        
+        function OLDshareAsImage() {
             const results = window.assessmentResults;
             const timestamp = new Date().toLocaleString();
             const currentURL = window.location.href;
